@@ -1,0 +1,15 @@
+{
+  "name": "socialmediapro",
+  "version": "1.0.0",
+  "description": "This is the project on Social media ",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "Scoal",
+    "media"
+  ],
+  "author": "mangesh vispute",
+  "license": "ISC"
+}
