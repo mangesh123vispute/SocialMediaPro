@@ -27,7 +27,7 @@ const userSchema = new Schema(
       index: true,
     },
     avatar: {
-      type: String, // we will use cloudinary service to store the image only its url will be stored in the databse
+      type: String, // we will use cloudinary service to store the image, only its url will be stored in the databse
       required: true,
     },
     coverimage: {
@@ -61,6 +61,7 @@ userSchema.pre("save", async function (next) {
     next();
   }
 });
+// The use of this here is crucial because it allows you to refer to the specific user document that's being saved. It ensures that the correct password is hashed for the current user being processed.
 
 // comparing the password given by user and which is stored in the databse in encyprited form
 userSchema.methods.isPasswordCorrect = async function (password) {
