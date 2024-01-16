@@ -205,4 +205,136 @@ const refreshToken = asyncHandeler(async (req, res) => {
   }
 });
 
-export { registerUser, loginUser, logoutUser, refreshToken };
+const changeCurrentPassword = asyncHandeler(async (req, res) => {
+  const { oldPassword, newPassword, confirmPassword } = req.body;
+  if (!oldPassword || !newPassword || !confirmPassword) {
+    throw new ApiError(400, "All fields are required");
+  }
+  if (newPassword !== confirmPassword) {
+    throw new ApiError(400, "Passwords do not match");
+  }
+  const user = await User.findById(req.user._id);
+  const isPasswordCorrect = await user.isPasswordCorrect(oldPassword);
+  if (!isPasswordCorrect) {
+    throw new ApiError(401, "Invalid Old password");
+  }
+  user.password = newPassword;
+  await user.save({ validateBeforeSave: false });
+  return res
+    .status(200)
+    .json(new ApiResponse(200, {}, "Password changed successfully"));
+});
+
+const getCurrentUser = asyncHandeler(async (req, res) => {
+  return res.status(200).json(200, req.user, "User fetched successfully");
+});
+
+const updateAccountDetails = asyncHandeler(async (req, res) => {
+  // algo
+  // 1. Get the fields to update from frontend
+  // 2. verify the fields
+  // 3. Get the user and update
+  // 4. return the response
+
+  const { fullname, username, email } = req.body;
+  if (!fullname || !username || !email) {
+    throw new ApiError(400, "All fields are required");
+  }
+  const user = await User.findByIdAndUpdate(
+    req.user._id,
+    {
+      $set: {
+        fullname,
+        username,
+        email,
+      },
+    },
+    {
+      new: true,
+    }
+  ).select("-password");
+  if (!user) {
+    throw new ApiError(404, "User not updated");
+  }
+  return res
+    .status(200)
+    .json(new ApiResponse(200, user, "User updated successfully"));
+});
+
+const updateUserAvatar = asyncHandeler(async (req, res) => {
+  // algo
+  //1. Get the image from frontend using the multer
+  //2. set the image in cloudinary
+  //3. get the user and update the cloudnary image url
+  //4. return the response
+  const avatarLocalPath = req.file?.path;
+  if (!avatarLocalPath) {
+    throw new ApiError(400, "avatar is missing");
+  }
+  const avatar = await cloudinaryUpload(avatarLocalPath);
+  if (!avatar.url) {
+    throw new ApiError(500, "Something went wrong while uploading the image");
+  }
+  const user = await User.findByIdAndUpdate(
+    req.user._id,
+    {
+      $set: {
+        avatar: avatar.url,
+      },
+    },
+    {
+      new: true,
+    }
+  ).select("-password");
+  if (!user) {
+    throw new ApiError(404, "User not updated");
+  }
+  return res
+    .status(200)
+    .json(new ApiResponse(200, user, "User updated successfully"));
+});
+
+const updateUserCoverImage = asyncHandeler(async (req, res) => {
+  // algo
+  //1. Get the image from frontend using the multer
+  //2. set the image in cloudinary
+  //3. get the user and update the cloudnary image url
+  //4. return the response
+  const coverImageLocalPath = req.file?.path;
+  if (!coverImageLocalPath) {
+    throw new ApiError(400, "coverImage  is missing");
+  }
+  const coverImage = await cloudinaryUpload(coverImageLocalPath);
+  if (!coverImage.url) {
+    throw new ApiError(500, "Something went wrong while uploading the image");
+  }
+  const user = await User.findByIdAndUpdate(
+    req.user._id,
+    {
+      $set: {
+        coverImage: coverImage.url,
+      },
+    },
+    {
+      new: true,
+    }
+  ).select("-password");
+  if (!user) {
+    throw new ApiError(404, "User not updated");
+  }
+  return res
+    .status(200)
+    .json(new ApiResponse(200, user, "User updated successfully"));
+});
+
+export {
+  registerUser,
+  loginUser,
+  logoutUser,
+  refreshToken,
+  changeCurrentPassword,
+  getCurrentUser,
+  updateAccountDetails,
+  updateUserAvatar,
+  updateUserCoverImage,
+};
