@@ -147,7 +147,9 @@ const logoutUser = asyncHandeler(async (req, res) => {
   await User.findByIdAndUpdate(
     req.user._id,
     {
-      refreshToken: undefined,
+      $unset: {
+        refreshToken: 1,
+      },
     },
     { new: true }
   );
@@ -207,6 +209,7 @@ const refreshToken = asyncHandeler(async (req, res) => {
 
 const changeCurrentPassword = asyncHandeler(async (req, res) => {
   const { oldPassword, newPassword, confirmPassword } = req.body;
+  console.log(req.body);
   if (!oldPassword || !newPassword || !confirmPassword) {
     throw new ApiError(400, "All fields are required");
   }
